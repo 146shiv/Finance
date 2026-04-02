@@ -1,4 +1,5 @@
 import express from "express";
+import crypto from "crypto";
 import morgan from "morgan";
 import { env, validateEnv } from "./config/env.js";
 import { connectMongo } from "./db/mongo.js";
@@ -7,11 +8,22 @@ import { globalErrorHandler, notFoundHandler } from "./validations/error.js";
 
 const app = express();
 
+morgan.token("reqId", (req, res) => res.locals?.requestId || "unknown");
+
 app.use(express.json());
-app.use(morgan("dev"));
+app.use((req, res, next) => {
+  res.locals.requestId = req.headers["x-request-id"] || crypto.randomUUID();
+  res.setHeader("x-request-id", res.locals.requestId);
+  next();
+});
+app.use(
+  morgan(":method :url :status :response-time ms reqId=:reqId", {
+    immediate: false,
+  }),
+);
 
 app.get("/health", (req, res) => {
-  res.status(200).json({ success: true, message: "Server is healthy" });
+  res.status(200).json({ success: true, message: "Server is healthy", requestId: res.locals.requestId });
 });
 
 app.use("/api/v1", apiRoutes);

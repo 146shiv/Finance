@@ -8,11 +8,12 @@ import {
 } from "../controllers/financialRecord.controller.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
 import { allowRoles } from "../middlewares/role.middleware.js";
-import { validateBody } from "../middlewares/validate.middleware.js";
+import { validateBody, validateQuery } from "../middlewares/validate.middleware.js";
 import { USER_ROLES } from "../models/User.model.js";
 import { asyncHandler } from "../validations/error.js";
 import {
   validateCreateFinancialRecord,
+  validateFinancialRecordFilters,
   validateUpdateFinancialRecord,
 } from "../validations/financialRecord.validation.js";
 
@@ -23,6 +24,7 @@ financialRecordRouter.use(requireAuth);
 financialRecordRouter.get(
   "/",
   allowRoles(USER_ROLES.VIEWER, USER_ROLES.ANALYST, USER_ROLES.ADMIN),
+  validateQuery(validateFinancialRecordFilters),
   asyncHandler(listFinancialRecordsController),
 );
 financialRecordRouter.get(

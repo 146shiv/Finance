@@ -3,7 +3,7 @@ import { FinancialRecord } from "../models/FinancialRecord.model.js";
 import { USER_ROLES } from "../models/User.model.js";
 import { AppError } from "../validations/error.js";
 import { successResponse } from "../validations/response.js";
-import { ensureValidRecordId, validateFinancialRecordFilters } from "../validations/financialRecord.validation.js";
+import { ensureValidRecordId } from "../validations/financialRecord.validation.js";
 
 function toPublicRecord(record) {
   return {
@@ -40,10 +40,7 @@ export async function createFinancialRecordController(req, res) {
 }
 
 export async function listFinancialRecordsController(req, res) {
-  const validation = validateFinancialRecordFilters(req.query);
-  if (validation.error) throw new AppError("Validation failed", 400, "VALIDATION_ERROR", validation.error);
-
-  const { page, limit, startDate, endDate, type, category, sortOrder } = validation.value;
+  const { page, limit, startDate, endDate, type, category, sortOrder } = req.query;
   const query = {
     isDeleted: false,
     ...buildAccessFilter(req.user),

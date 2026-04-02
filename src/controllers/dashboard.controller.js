@@ -100,8 +100,7 @@ export async function getMonthlyTrendsController(req, res) {
 }
 
 export async function getRecentTransactionsController(req, res) {
-  const rawLimit = Number.parseInt(req.query.limit || "10", 10);
-  const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 100) : 10;
+  const { limit } = req.query;
 
   const match = buildAccessMatch(req.user);
   const records = await FinancialRecord.find(match).sort({ date: -1, createdAt: -1 }).limit(limit);

@@ -53,10 +53,29 @@ export function globalErrorHandler(error, req, res, next) {
     });
   }
 
+  if (error.name === "CastError") {
+    return errorResponse(res, {
+      statusCode: 400,
+      message: `Invalid value for ${error.path}`,
+      code: "INVALID_INPUT",
+      details: env.nodeEnv === "production" ? null : [{ field: error.path, message: error.message }],
+    });
+  }
+
   const statusCode = error.statusCode || 500;
   const message = error.message || "Internal server error";
   const code = error.code || "INTERNAL_ERROR";
   const details = env.nodeEnv === "production" ? null : error.details;
+
+  if (statusCode >= 500) {
+    console.error("Unhandled error", {
+      requestId: res.locals?.requestId,
+      method: req.method,
+      path: req.originalUrl,
+      code,
+      message,
+    });
+  }
 
   return errorResponse(res, { statusCode, message, code, details });
 }
