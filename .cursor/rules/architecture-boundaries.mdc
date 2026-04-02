@@ -1,0 +1,20 @@
+---
+description: Enforce route-controller-service-model boundaries
+globs: src/**/*.js
+alwaysApply: false
+---
+
+# Architecture Boundaries
+
+For backend code under `src/`.
+
+- Routes define endpoints and middleware only; no business logic.
+- Controllers orchestrate request/response only; keep handlers thin.
+- Services contain business logic and policy decisions.
+- Models define schema and persistence concerns only.
+- Controllers must not perform direct database logic beyond service delegation.
+- Services must not depend on Express `req`/`res`.
+- Keep cross-layer dependencies one-directional:
+  - `routes -> controllers -> services -> models`
+- Shared helpers belong in `utils/`; reusable request guards in `middlewares/`.
+- Central response and error behavior must use `validations/response.js` and `validations/error.js`.
