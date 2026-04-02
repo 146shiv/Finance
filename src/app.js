@@ -2,7 +2,7 @@ import express from "express";
 import crypto from "crypto";
 import morgan from "morgan";
 import { env, validateEnv } from "./config/env.js";
-import { connectMongo } from "./db/mongo.js";
+import { connectMongo, disconnectMongo } from "./db/mongo.js";
 import apiRoutes from "./routes/index.routes.js";
 import { globalErrorHandler, notFoundHandler } from "./validations/error.js";
 
@@ -33,9 +33,20 @@ app.use(globalErrorHandler);
 async function startServer() {
   validateEnv();
   await connectMongo();
-  app.listen(env.port, () => {
+  const server = app.listen(env.port, () => {
     console.log(`Server running on port ${env.port}`);
   });
+
+  const shutdown = async () => {
+    console.log("Shutting down server");
+    server.close(async () => {
+      await disconnectMongo();
+      process.exit(0);
+    });
+  };
+
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 }
 
 startServer().catch((error) => {
