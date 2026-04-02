@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createUserController,
+  deleteUserController,
   listUsersController,
   updateUserRoleController,
   updateUserStatusController,
@@ -24,5 +25,6 @@ userRouter.get("/", asyncHandler(listUsersController));
 userRouter.post("/", validateBody(validateCreateUser), asyncHandler(createUserController));
 userRouter.patch("/:id/role", validateBody(validateRoleUpdate), asyncHandler(updateUserRoleController));
 userRouter.patch("/:id/status", validateBody(validateStatusUpdate), asyncHandler(updateUserStatusController));
+userRouter.delete("/:id", asyncHandler(deleteUserController));
 
 export default userRouter;

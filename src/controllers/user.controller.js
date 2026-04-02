@@ -78,3 +78,17 @@ export async function updateUserStatusController(req, res) {
     data: toPublicUser(user),
   });
 }
+
+export async function deleteUserController(req, res) {
+  const idValidation = ensureValidObjectId(req.params.id);
+  if (idValidation.error) throw new AppError("Validation failed", 400, "VALIDATION_ERROR", idValidation.error);
+
+  const user = await User.softDeleteById(req.params.id, req.user.id);
+  if (!user) throw new AppError("User not found", 404, "USER_NOT_FOUND");
+
+  return successResponse(res, {
+    statusCode: 200,
+    message: "User deleted successfully",
+    data: { id: user._id.toString() },
+  });
+}
