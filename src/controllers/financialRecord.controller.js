@@ -102,13 +102,11 @@ export async function deleteFinancialRecordController(req, res) {
   const idValidation = ensureValidRecordId(req.params.id);
   if (idValidation.error) throw new AppError("Validation failed", 400, "VALIDATION_ERROR", idValidation.error);
 
-  const query = { _id: req.params.id, isDeleted: false, ...buildAccessFilter(req.user) };
-  const record = await FinancialRecord.findOneAndUpdate(
-    query,
-    { $set: { isDeleted: true, deletedAt: new Date() } },
-    { new: true },
-  );
-  if (!record) throw new AppError("Financial record not found", 404, "FINANCIAL_RECORD_NOT_FOUND");
+  const query = { _id: req.params.id, ...buildAccessFilter(req.user) };
+  const existingRecord = await FinancialRecord.findOne(query);
+  if (!existingRecord) throw new AppError("Financial record not found", 404, "FINANCIAL_RECORD_NOT_FOUND");
+
+  const record = await FinancialRecord.softDeleteById(existingRecord._id, req.user.id);
 
   return successResponse(res, {
     statusCode: 200,

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { softDeletePlugin } from "../utils/softDelete.plugin.js";
 
 export const USER_ROLES = {
   VIEWER: "Viewer",
@@ -18,11 +19,20 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     isActive: { type: Boolean, default: true },
-    isDeleted: { type: Boolean, default: false },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: {
+      transform: (doc, ret) => {
+        delete ret.passwordHash;
+        delete ret.__v;
+        return ret;
+      },
+    },
+  },
 );
 
+userSchema.plugin(softDeletePlugin);
 userSchema.index({ role: 1, isActive: 1 });
 
 export const User = mongoose.model("User", userSchema);

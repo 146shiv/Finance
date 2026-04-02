@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { softDeletePlugin } from "../utils/softDelete.plugin.js";
 
 export const FINANCIAL_RECORD_TYPES = {
   INCOME: "income",
@@ -17,13 +18,20 @@ const financialRecordSchema = new mongoose.Schema(
     },
     category: { type: String, required: true, trim: true, index: true },
     date: { type: Date, required: true, index: true },
-    notes: { type: String, trim: true, default: "" },
-    isDeleted: { type: Boolean, default: false, index: true },
-    deletedAt: { type: Date, default: null },
+    notes: { type: String, trim: true, default: "", maxlength: 500 },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: {
+      transform: (doc, ret) => {
+        delete ret.__v;
+        return ret;
+      },
+    },
+  },
 );
 
+financialRecordSchema.plugin(softDeletePlugin);
 financialRecordSchema.index({ userId: 1, date: -1 });
 financialRecordSchema.index({ type: 1, category: 1 });
 
