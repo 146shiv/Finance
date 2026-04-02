@@ -25,3 +25,6 @@ coverage/
 
 # macOS
 .DS_Store
+
+# cursor
+.cursor/
